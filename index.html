@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Mario Kart!</title>
+        <script src="mariokart-0.2.js"></script>
+        <style type="text/css" media="all"> 
+        #mariokartcontainer img {
+            padding : 0 !important;
+            margin : 0 !important;
+            border : none !important;
+        }
+        </style> 
+    </head>
+    <body>
+        <br/>Quality:
+        <select id="quality">
+            <option value="4">Low</option>
+            <option value="2">Medium</option>
+            <option value="1" selected>High</option>
+        </select>&nbsp;&nbsp;Screen size:
+        <select id="screenscale">
+            <option value="2">Small</option>
+            <option value="4">Medium</option>
+            <option value="6">Large</option>
+            <option value="8" selected>Very large</option>
+        </select>&nbsp;&nbsp;Render mode:
+        <select id="rendermode">
+            <option value="0" selected>Single Canvas</option>
+            <option value="1">Per-line canvas</option>
+        </select>&nbsp;&nbsp;Music:
+        <select id="music">
+            <option value="0">Off</option>
+            <option value="1" selected>On</option>
+        </select>
+        <script>
+            function onQualityChange() {
+                var oList = document.getElementById("quality");
+                var iValue = parseInt(oList.item(oList.selectedIndex).value);
+                MarioKartControl.setQuality(iValue);
+            }
+            function onScaleChange() {
+                var oList = document.getElementById("screenscale");
+                var iValue = parseInt(oList.item(oList.selectedIndex).value);
+                MarioKartControl.setScreenScale(iValue);
+            }
+            function onRenderModeChange() {
+                var oList = document.getElementById("rendermode");
+                var iValue = parseInt(oList.item(oList.selectedIndex).value);
+                MarioKartControl.setRenderMode(iValue);
+            }
+            function onMusicChange() {
+                var oList = document.getElementById("music");
+                var iValue = parseInt(oList.item(oList.selectedIndex).value);
+                MarioKartControl.setMusic(iValue);
+            }
+            document.getElementById("quality").onchange = onQualityChange;
+            document.getElementById("screenscale").onchange = onScaleChange;
+            document.getElementById("rendermode").onchange = onRenderModeChange;
+            document.getElementById("music").onchange = onMusicChange;
+        </script>
+        
+        <div id="mariokartcontainer" style="height:400px;position:relative;" />
+    </body>
+</html>
