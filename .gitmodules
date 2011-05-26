@@ -1,3 +1,6 @@
 [submodule "support/socket.io"]
 	path = support/socket.io
 	url = git://github.com/LearnBoost/Socket.IO.git
+[submodule "support/connect"]
+	path = support/connect
+	url = http://github.com/senchalabs/connect.git
