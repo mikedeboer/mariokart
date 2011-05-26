@@ -2,6 +2,7 @@
 <html>
     <head>
         <title>Mario Kart!</title>
+        <script src="socket.io.min.js"></script>
         <script src="mariokart-0.2.js"></script>
         <style type="text/css" media="all"> 
         #mariokartcontainer img {
@@ -12,6 +13,7 @@
         </style> 
     </head>
     <body>
+        <script src="multiplayer.js"></script>
         <br/>Quality:
         <select id="quality">
             <option value="4">Low</option>
@@ -36,22 +38,22 @@
             function onQualityChange() {
                 var oList = document.getElementById("quality");
                 var iValue = parseInt(oList.item(oList.selectedIndex).value);
-                MarioKartControl.setQuality(iValue);
+                MarioKart.setQuality(iValue);
             }
             function onScaleChange() {
                 var oList = document.getElementById("screenscale");
                 var iValue = parseInt(oList.item(oList.selectedIndex).value);
-                MarioKartControl.setScreenScale(iValue);
+                MarioKart.setScreenScale(iValue);
             }
             function onRenderModeChange() {
                 var oList = document.getElementById("rendermode");
                 var iValue = parseInt(oList.item(oList.selectedIndex).value);
-                MarioKartControl.setRenderMode(iValue);
+                MarioKart.setRenderMode(iValue);
             }
             function onMusicChange() {
                 var oList = document.getElementById("music");
                 var iValue = parseInt(oList.item(oList.selectedIndex).value);
-                MarioKartControl.setMusic(iValue);
+                MarioKart.setMusic(iValue);
             }
             document.getElementById("quality").onchange = onQualityChange;
             document.getElementById("screenscale").onchange = onScaleChange;

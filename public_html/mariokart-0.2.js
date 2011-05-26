@@ -1,7 +1,9 @@
+(function(exports) {
+
 function MarioKart() {
     var oMaps = {
         "map1": {
-            "texture": "map_1.png",
+            "texture": "media/map_1.png",
             "width": 512,
             "height": 512,
             "collision": [
@@ -13,11 +15,10 @@ function MarioKart() {
                 [368, 4, 140, 76],
                 [4, 436, 236, 72]
             ],
-            "startposition": {
+            "startpositions": [{
                 x: 476,
                 y: 356
-            },
-            "aistartpositions": [{
+            }, {
                 x: 476 - 18,
                 y: 356 - 18
             }, {
@@ -43,7 +44,7 @@ function MarioKart() {
             ]
         },
         "map2": {
-            "texture": "map_2.png",
+            "texture": "media/map_2.png",
             "width": 512,
             "height": 512,
             "collision": [
@@ -81,11 +82,10 @@ function MarioKart() {
                 [224, 228, 12, 12],
                 [216, 220, 12, 12]
             ],
-            "startposition": {
+            "startpositions": [{
                 x: 70,
                 y: 322
-            },
-            "aistartpositions": [{
+            }, {
                 x: 70 - 18,
                 y: 322 - 18
             }, {
@@ -126,31 +126,38 @@ function MarioKart() {
     var iScreenScale = 8;
     var iQuality = 1; // 1 = best, 2 = half as many lines, etc.
     var bSmoothSprites = true;
-    var bMusic = true;
+    var bMusic = false;//true;
+    var _self = this;
 
     function setRenderMode(iValue) {
         if (bCounting) return;
         iRenderMode = iValue;
         if (bRunning) resetScreen();
     }
+    this.setRenderMode = setRenderMode;
 
     function setScreenScale(iValue) {
         if (bCounting) return;
         iScreenScale = iValue;
         if (bRunning) resetScreen();
     }
+    this.setScreenScale = setScreenScale;
 
     function setQuality(iValue) {
         if (bCounting) return;
         iQuality = iValue;
         if (bRunning) resetScreen();
     }
+    this.setQuality = setQuality;
+    
     var oMap;
     var oHills;
     var oTrees;
-    var aPlayers = ["mario", "luigi", "peach"];
+    var aCharacters = ["mario", "luigi", "peach"];
+    var aPlayers = [];
     var oPlayer;
     var strPlayer = "";
+    var iStartPos = -1;
     var iMapWidth;
     var iMapHeight;
     var oMapImg;
@@ -159,6 +166,7 @@ function MarioKart() {
         oMap = oMaps[strMap];
         loadMap(oMap);
     }
+    this.resetGame = resetGame;
 
     function loadMap() {
         oMapImg = new Image();
@@ -179,36 +187,42 @@ function MarioKart() {
         if (bMusic) {
             startMusic();
         }
-        oPlayer = {
-            x: oMap.startposition.x,
-            y: oMap.startposition.y,
-            speed: 0,
-            speedinc: 0,
-            rotation: oMap.startrotation,
-            rotincdir: 0,
-            rotinc: 0,
-            sprite: new Sprite(strPlayer),
-            cpu: false
-        }
         aKarts = [];
-        aKarts.push(oPlayer);
-        var iAI = 0;
-        for (var i = 0; i < aPlayers.length; i++) {
-            if (aPlayers[i] != strPlayer) {
+        for (var i = 0, l = aPlayers.length; i < l; ++i) {
+            ++iStartPos;
+            var p = {
+                player: aPlayers[i],
+                x: oMap.startpositions[iStartPos].x,
+                y: oMap.startpositions[iStartPos].y,
+                speed: 0,
+                speedinc: 0,
+                rotation: oMap.startrotation,
+                rotincdir: 0,
+                rotinc: 0,
+                sprite: new Sprite(aPlayers[i]),
+                cpu: false
+            };
+            if (aPlayers[i] == strPlayer)
+                oPlayer = p;
+            aKarts.push(p);
+        }
+        for (i = 0, l = aCharacters.length; i < l; ++i) {
+            if (aPlayers.indexOf(aCharacters[i]) === -1) {
+                ++iStartPos;
                 var oEnemy = {
-                    x: oMap.aistartpositions[iAI].x,
-                    y: oMap.aistartpositions[iAI].y,
+                    player: aCharacters[i],
+                    x: oMap.startpositions[iStartPos].x,
+                    y: oMap.startpositions[iStartPos].y,
                     speed: 0,
                     speedinc: 0,
                     rotation: oMap.startrotation,
                     rotincdir: 0,
                     rotinc: 0,
-                    sprite: new Sprite(aPlayers[i]),
+                    sprite: new Sprite(aCharacters[i]),
                     cpu: true,
                     aipoint: 0
                 };
                 aKarts.push(oEnemy);
-                iAI++;
             }
         }
         render();
@@ -222,7 +236,7 @@ function MarioKart() {
         oCntStyle.top = (4 * iScreenScale) + "px";
         oCntStyle.left = (8 * iScreenScale) + "px";
         var oCountImg = document.createElement("img");
-        oCountImg.src = "countdown.png";
+        oCountImg.src = "media/countdown.png";
         oCountImg.style.position = "absolute";
         oCountImg.style.left = "0px";
         oCountImg.height = 12 * iScreenScale;
@@ -255,7 +269,7 @@ function MarioKart() {
     function startMusic() {
         bMusicPlaying = true;
         oMusicEmbed = document.createElement("embed");
-        oMusicEmbed.src = strMap + ".mid";
+        oMusicEmbed.src = "media/" + strMap + ".mid";
         oMusicEmbed.setAttribute("loop", "true");
         oMusicEmbed.setAttribute("autostart", "true");
         oMusicEmbed.style.position = "absolute";
@@ -271,6 +285,17 @@ function MarioKart() {
         bMusicPlaying = false;
         document.body.removeChild(oMusicEmbed);
     }
+    
+    this.setMusic = function(iValue) {
+        bMusic = !! iValue;
+        if (bMusic && !bMusicPlaying && bRunning) {
+            startMusic();
+        }
+        if (!bMusic && bMusicPlaying) {
+            stopMusic();
+        }
+    };
+
     var fSpriteScale = 0;
     var fLineScale = 0;
     // setup main container
@@ -370,7 +395,7 @@ function MarioKart() {
         var oImg = new Image();
         oImg.style.position = "absolute";
         oImg.style.left = "0px";
-        oImg.src = "sprite_" + strSprite + (bSmoothSprites ? "_smooth" : "") + ".png";
+        oImg.src = "media/sprite_" + strSprite + (bSmoothSprites ? "_smooth" : "") + ".png";
         var oSpriteCtr = document.createElement("div");
         oSpriteCtr.style.width = "32px";
         oSpriteCtr.style.height = "32px";
@@ -427,7 +452,7 @@ function MarioKart() {
         oImg1.onload = function() {
             oCanvas1.getContext("2d").drawImage(oImg1, 0, 0);
         }
-        oImg1.src = "bg_" + strImage + ".png";
+        oImg1.src = "media/bg_" + strImage + ".png";
         oCanvas1.style.width = Math.round(iLayerWidth / 2 * iScreenScale + iScreenScale) + "px"
         oCanvas1.style.height = (10 * iScreenScale) + "px";
         oCanvas1.style.position = "absolute";
@@ -438,7 +463,7 @@ function MarioKart() {
         oImg2.onload = function() {
             oCanvas2.getContext("2d").drawImage(oImg2, 0, 0);
         }
-        oImg2.src = "bg_" + strImage + ".png";
+        oImg2.src = "media/bg_" + strImage + ".png";
         oCanvas2.style.width = Math.round(iLayerWidth / 2 * iScreenScale) + "px";
         oCanvas2.style.height = (10 * iScreenScale) + "px";
         oCanvas2.style.position = "absolute";
@@ -476,8 +501,7 @@ function MarioKart() {
         oViewCtx.save();
         oViewCtx.translate(iViewCanvasWidth / 2, iViewCanvasHeight - iViewYOffset);
         oViewCtx.rotate((180 + oPlayer.rotation) * Math.PI / 180);
-        oViewCtx.drawImage(
-        oMapImg, -oPlayer.x, -oPlayer.y);
+        oViewCtx.drawImage(oMapImg, -oPlayer.x, -oPlayer.y);
         oViewCtx.restore();
         oScreenCanvas.width = oScreenCanvas.width;
         oScreenCtx.fillStyle = "green";
@@ -487,9 +511,11 @@ function MarioKart() {
             if (iRenderMode == 0) {
                 try {
                     oScreenCtx.drawImage(
-                    oViewCanvas, iViewCanvasWidth / 2 - (oStrip.stripwidth / 2),
-                    //Math.floor(((iViewCanvasHeight-iViewYOffset) - oStrip.mapz)),
-                    ((iViewCanvasHeight - iViewYOffset) - oStrip.mapz) - 1, oStrip.stripwidth, oStrip.mapzspan, 0, (iHeight - oStrip.viewy) / fLineScale, iWidth / fLineScale, 1);
+                        oViewCanvas, iViewCanvasWidth / 2 - (oStrip.stripwidth / 2),
+                        //Math.floor(((iViewCanvasHeight-iViewYOffset) - oStrip.mapz)),
+                        ((iViewCanvasHeight - iViewYOffset) - oStrip.mapz) - 1, oStrip.stripwidth, oStrip.mapzspan, 0, 
+                        (iHeight - oStrip.viewy) / fLineScale, iWidth / fLineScale, 1
+                    );
                 }
                 catch (e) {};
             }
@@ -500,16 +526,20 @@ function MarioKart() {
                 oStrip.canvas.getContext("2d").clearRect(0, 0, oStrip.stripwidth, 1);
                 try {
                     oStrip.canvas.getContext("2d").drawImage(
-                    oViewCanvas, iViewCanvasWidth / 2 - (oStrip.stripwidth / 2), ((iViewCanvasHeight - iViewYOffset) - oStrip.mapz) - 1, oStrip.stripwidth, oStrip.mapzspan, 0, 0, oStrip.stripwidth, iStripHeight);
+                        oViewCanvas, iViewCanvasWidth / 2 - (oStrip.stripwidth / 2), 
+                        ((iViewCanvasHeight - iViewYOffset) - oStrip.mapz) - 1, oStrip.stripwidth, 
+                        oStrip.mapzspan, 0, 0, oStrip.stripwidth, iStripHeight
+                    );
                 }
                 catch (e) {};
             }
         }
         var iOffsetX = (iWidth / 2) * iScreenScale;
         var iOffsetY = (iHeight - iViewYOffset) * iScreenScale;
+        var zIndexBase = 10000;
         for (var i = 0; i < aKarts.length; i++) {
             var oKart = aKarts[i];
-            if (oKart.cpu) {
+            if (oKart != oPlayer) { //oKart.cpu) {
                 var fCamX = -(oPlayer.x - oKart.x);
                 var fCamY = -(oPlayer.y - oKart.y);
                 var fRotRad = oPlayer.rotation * Math.PI / 180;
@@ -527,12 +557,14 @@ function MarioKart() {
                 var iAngleStep = Math.round(fAngle / (360 / 22));
                 if (iAngleStep == 22) iAngleStep = 0;
                 oKart.sprite.setState(iAngleStep);
-                oKart.sprite.div.style.zIndex = Math.round(10000 - fTransY);
+                oKart.sprite.div.style.zIndex = Math.round(zIndexBase - fTransY);
                 oKart.sprite.draw(((iWidth / 2) + fViewX) * iScreenScale, (iHeight - iViewY) * iScreenScale, fFocal / (fFocal + (fTransY)));
             }
+            else {
+                oKart.sprite.div.style.zIndex = zIndexBase;
+                oKart.sprite.draw(iOffsetX, iOffsetY, 1);
+            }
         }
-        oPlayer.sprite.div.style.zIndex = 10000;
-        oPlayer.sprite.draw(iOffsetX, iOffsetY, 1);
         oHills.draw(oPlayer.rotation);
         oTrees.draw(oPlayer.rotation);
     }
@@ -651,56 +683,60 @@ function MarioKart() {
     document.onkeydown = function(e) {
         if (!bRunning) return;
         switch (e.keyCode) {
-        case 38:
-            // up
-            oPlayer.speedinc = 1;
-            break;
-        case 37:
-            // left
-            oPlayer.rotincdir = 1;
-            break;
-        case 39:
-            // right
-            oPlayer.rotincdir = -1;
-            break;
-        case 40:
-            // down
-            oPlayer.speedinc -= 0.2;
-            break;
+            case 38:
+                // up
+                oPlayer.speedinc = 1;
+                break;
+            case 37:
+                // left
+                oPlayer.rotincdir = 1;
+                break;
+            case 39:
+                // right
+                oPlayer.rotincdir = -1;
+                break;
+            case 40:
+                // down
+                oPlayer.speedinc -= 0.2;
+                break;
         }
+        _self.emit("playerMove", oPlayer);
     }
     document.onkeyup = function(e) {
         if (!bRunning) return;
         switch (e.keyCode) {
-        case 38:
-            // up
-            oPlayer.speedinc = 0;
-            break;
-        case 37:
-            // left
-            oPlayer.rotincdir = 0;
-            break;
-        case 39:
-            // right
-            oPlayer.rotincdir = 0;
-            break;
-        case 40:
-            // down
-            oPlayer.speedinc = 0;
-            break;
+            case 38:
+                // up
+                oPlayer.speedinc = 0;
+                break;
+            case 37:
+                // left
+                oPlayer.rotincdir = 0;
+                break;
+            case 39:
+                // right
+                oPlayer.rotincdir = 0;
+                break;
+            case 40:
+                // down
+                oPlayer.speedinc = 0;
+                break;
         }
+        _self.emit("playerMove", oPlayer);
     }
     // hastily tacked on intro screens, so you can select driver and track.
+    
+    var oStatus, oScr;
 
     function selectPlayerScreen() {
-        var oScr = document.createElement("div");
+        oScr = document.createElement("div");
         var oStyle = oScr.style;
         oStyle.width = (iWidth * iScreenScale) + "px";
         oStyle.height = (iHeight * iScreenScale) + "px";
         oStyle.border = "1px solid black";
         oStyle.backgroundColor = "black";
         var oTitle = document.createElement("img");
-        oTitle.src = "title.png";
+        oTitle.src = "media/title.png";
         oTitle.style.position = "absolute";
         oTitle.style.width = (39 * iScreenScale) + "px";
         oTitle.style.height = (13 * iScreenScale) + "px";
@@ -710,27 +746,46 @@ function MarioKart() {
         oCtrStyle.width = (iWidth * iScreenScale) + "px";
         oCtrStyle.height = (iHeight * iScreenScale) + "px";
         oContainer.appendChild(oScr);
-        for (var i = 0; i < aPlayers.length; i++) {
+        for (var i = 0; i < aCharacters.length; i++) {
             var oPImg = document.createElement("img");
-            oPImg.src = "select_" + aPlayers[i] + ".png";
+            oPImg.src = "media/select_" + aCharacters[i] + ".png";
             oPImg.style.width = (12 * iScreenScale) + "px";
             oPImg.style.height = (12 * iScreenScale) + "px";
             oPImg.style.position = "absolute"
-            oPImg.style.left = (((iWidth - 12 * aPlayers.length) / 2 + i * 12) * iScreenScale) + "px";
+            oPImg.style.left = (((iWidth - 12 * aCharacters.length) / 2 + i * 12) * iScreenScale) + "px";
             oPImg.style.top = (18 * iScreenScale) + "px";
-            oPImg.player = aPlayers[i];
+            oPImg.player = aCharacters[i];
             oPImg.onclick = function() {
                 strPlayer = this.player;
-                oScr.innerHTML = "";
-                oContainer.removeChild(oScr);
-                selectMapScreen();
+                _self.addPlayer(strPlayer);
+                _self.emit("playerSelect", strPlayer);
             }
             oScr.appendChild(oPImg);
         }
+        
+        oStatus = document.createElement("blink");
+        oStatus.style.position = "absolute";
+        oStatus.style.width = (45 * iScreenScale) + "px";
+        oStatus.style.height = (3 * iScreenScale) + "px";
+        oStatus.style.left = ((iWidth - 34) / 2 * iScreenScale) + "px";
+        oStatus.style.top = (31 * iScreenScale) + "px";
+        oStatus.style.color = "silver";
+        oStatus.style.fontStyle = "bold";
+        oStatus.style.fontFamily = "monospaced";
+        oStatus.style.fontSize = "22px";
+        oStatus.appendChild(document.createTextNode("Select a character!"));
+        
+        oScr.appendChild(oStatus);
     }
+    
+    this.gotoSelectMap = function() {
+        oScr.innerHTML = "";
+        oContainer.removeChild(oScr);
+        selectMapScreen();
+    };
 
     function selectMapScreen() {
-        var oScr = document.createElement("div");
+        oScr = document.createElement("div");
         var oStyle = oScr.style;
         oStyle.width = (iWidth * iScreenScale) + "px";
         oStyle.height = (iHeight * iScreenScale) + "px";
@@ -740,7 +795,7 @@ function MarioKart() {
         oCtrStyle.height = (iHeight * iScreenScale) + "px";
         oContainer.appendChild(oScr);
         var oTitle = document.createElement("img");
-        oTitle.src = "mushroomcup.png";
+        oTitle.src = "media/mushroomcup.png";
         oTitle.style.position = "absolute";
         oTitle.style.width = (36 * iScreenScale) + "px";
         oTitle.style.height = (6 * iScreenScale) + "px";
@@ -749,7 +804,7 @@ function MarioKart() {
         oScr.appendChild(oTitle);
         for (var i = 0; i < aAvailableMaps.length; i++) {
             var oPImg = document.createElement("img");
-            oPImg.src = "select_" + aAvailableMaps[i] + ".png";
+            oPImg.src = "media/select_" + aAvailableMaps[i] + ".png";
             oPImg.style.width = (30 * iScreenScale) + "px";
             oPImg.style.height = (12 * iScreenScale) + "px";
             oPImg.style.position = "absolute"
@@ -758,37 +813,254 @@ function MarioKart() {
             oPImg.map = aAvailableMaps[i];
             oPImg.onclick = function() {
                 strMap = this.map;
-                oScr.innerHTML = "";
-                oContainer.removeChild(oScr);
-                resetGame(strMap);
+                _self.emit("playerMapSelect", strMap);
             }
             oScr.appendChild(oPImg);
         }
     }
-    for (var i = 0; i < aPlayers.length; i++) {
-        var oImg = new Image();
-        oImg.src = "sprite_" + aPlayers[i] + "_smooth.png";
+    
+    this.gotoGameStart = function() {
+        oScr.innerHTML = "";
+        oContainer.removeChild(oScr);
+        resetGame(strMap);
     }
+    
+    for (var i = 0; i < aCharacters.length; i++) {
+        var oImg = new Image();
+        oImg.src = "media/sprite_" + aCharacters[i] + "_smooth.png";
+    }
+    
+    this.setStatusMessage = function(msg) {
+        if (oStatus && oStatus.firstChild)
+            oStatus.firstChild.nodeValue = msg.toString();
+    }
+    
     selectPlayerScreen();
-    window.MarioKartControl = {
-        setRenderMode: function(iValue) {
-            setRenderMode(iValue);
-        },
-        setQuality: function(iValue) {
-            setQuality(iValue);
-        },
-        setScreenScale: function(iValue) {
-            setScreenScale(iValue);
-        },
-        setMusic: function(iValue) {
-            bMusic = !! iValue;
-            if (bMusic && !bMusicPlaying && bRunning) {
-                startMusic();
-            }
-            if (!bMusic && bMusicPlaying) {
-                stopMusic();
+    
+    // multiplayer logic
+    this.addPlayer = function(name) {
+        if (aPlayers.indexOf(name) > -1)
+            return;
+        aPlayers.push(name);
+        //if (!strPlayer)
+        //    ++iStartPos;
+        // @todo make this action dependant on number of players
+        if (aPlayers.length > 1)
+            return _self.gotoSelectMap();
+        
+        var imgs = oScr.getElementsByTagName("img");
+        for (var i = 1, l = imgs.length; i < l; ++i) {
+            if (imgs[i].src.indexOf(name) > -1) {
+                imgs[i].style.opacity = "0.4";
+                imgs[i].onclick = null;
             }
         }
+        
+        // set status message
+        var oldVal = oStatus.firstChild.nodeValue;
+        if (name == strPlayer) {
+            _self.setStatusMessage("Please wait for another player to join...");
+        }
+        else {
+            _self.setStatusMessage(name + " joined the game!");
+            setTimeout(function() {
+                _self.setStatusMessage(oldVal);
+            }, 2000);
+        }
+    };
+    
+    this.setMap = function(map) {
+        strMap = map;
+    };
+    
+    this.movePlayer = function(player, data) {
+        if (!aKarts.length)
+            return;
+        for (var i = 0, l = aKarts.length; i < l; ++i) {
+            if (aKarts[i].player != player)
+                continue;
+            for (var j in data)
+                aKarts[i][j] = data[j];
+        }
+    };
+    
+    // event handling code:
+    this.events = {};
+
+    this.on = function(name, fn){
+        if (!(name in this.events))
+            this.events[name] = [];
+        this.events[name].push(fn);
+        return this;
+    };
+    
+    this.once = function(name, fn){
+        var self = this,
+            once = function(){
+                self.removeEvent(name, once);
+                fn.apply(self, arguments);
+            };
+        once.ref = fn;
+        self.on(name, once);
+        return this;
+    };
+
+    this.emit = function(name, args){
+        if (name in this.events){
+            var events = this.events[name];
+            for (var i = 0, ii = events.length; i < ii; i++)
+                events[i].apply(this, isArray(args) ? args : [args]);
+        }
+        return this;
+    };
+
+    this.removeEvent = function(name, fn){
+        if (name in this.events){
+            for (var a = 0, l = this.events[name].length; a < l; a++)
+                if (this.events[name][a] == fn || this.events[name][a].ref && this.events[name][a].ref == fn)
+                    this.events[name].splice(a, 1);    
+        }
+        return this;
     };
 }
-window.onload = MarioKart;
+
+var isArray = Array.isArray || function(arr) {
+    return arr && Object.prototype.toString.call(arr) === "[object Array]";
+};
+
+// browser detection:
+var sAgent = navigator.userAgent.toLowerCase() || "",
+    // 1->IE, 0->FF, 2->GCrome, 3->Safari, 4->Opera, 5->Konqueror 
+    b      = (typeof/./)[0]=='f'?+'1\0'?3:2:+'1\0'?5:1-'\0'?1:+{valueOf:function(x){return!x}}?4:0;
+if((typeof/./)[0]=='f' && parseFloat((sAgent.match(/(?:firefox|minefield)\/([\d\.]+)/i) || {})[1]) <= 2)
+    b = 0;
+if (b == 2 && sAgent.indexOf("chrome") == -1) 
+    b = 3;
+
+var isOpera       = b===4 || b===5;
+var isKonqueror   = b===5;
+var isSafari      = b===3;
+var isIphone      = sAgent.indexOf("iphone") != -1 || sAgent.indexOf("aspen simulator") != -1;
+var isChrome      = b===2;
+var isWebkit      = isSafari || isChrome || isKonqueror;
+var isGecko       = b===0;
+var isIE          = b===1;
+
+// DOMReady implementation
+var load_events = [],
+    load_timer  = null,
+    load_done   = false,
+    load_init   = null;
+
+function execDeferred() {
+    // execute each function in the stack in the order they were added
+    var len = load_events.length;
+    while (len--)
+        (load_events.shift())();
+}
+
+function onDomReady(func) {
+    //if (!this.$bdetect)
+    //    this.browserDetect();
+
+    if (load_done)
+        return func();
+
+    // create event function stack
+    //apf.done = arguments.callee.done;
+    if (!load_init) {
+        load_init = function() {
+            if (load_done) return;
+            // kill the timer
+            clearInterval(load_timer);
+            load_timer = null;
+            load_done  = true;
+            execDeferred();
+        };
+    }
+
+    load_events.push(func);
+
+    if (func && load_events.length == 1) {
+        // Catch cases where addDomLoadEvent() is called after the browser
+        // event has already occurred.
+        var doc = document, UNDEF = "undefined";
+        if ((typeof doc.readyState != UNDEF && doc.readyState == "complete")
+          || (doc.getElementsByTagName("body")[0] || doc.body))
+            return load_init();
+
+        // for Mozilla/Opera9.
+        // Mozilla, Opera (see further below for it) and webkit nightlies
+        // currently support this event
+        if (doc.addEventListener && !isOpera) {
+            // We're using "window" and not "document" here, because it results
+            // in a memory leak, especially in FF 1.5:
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=241518
+            // See also:
+            // http://bitstructures.com/2007/11/javascript-method-callbacks
+            // http://www-128.ibm.com/developerworks/web/library/wa-memleak/
+            window.addEventListener("DOMContentLoaded", load_init, false);
+        }
+        // If IE is used and is not in a frame
+        else if (isIE && window == top) {
+            load_timer = setInterval(function() {
+                try {
+                    // If IE is used, use the trick by Diego Perini
+                    // http://javascript.nwbox.com/IEContentLoaded/
+                    doc.documentElement.doScroll("left");
+                }
+                catch(ex) {
+                    setTimeout(arguments.callee, 0);
+                    return;
+                }
+                // no exceptions anymore, so we can call the init!
+                load_init();
+            }, 10);
+        }
+        else if (isOpera) {
+            doc.addEventListener("DOMContentLoaded", function() {
+                load_timer = setInterval(function() {
+                    for (var i = 0, l = doc.styleSheets.length; i < l; i++) {
+                        if (doc.styleSheets[i].disabled)
+                            return;
+                    }
+                    // all is fine, so we can call the init!
+                    load_init();
+                }, 10);
+            }, false);
+        }
+        else if (isWebkit && !isIphone) {
+            var aSheets = doc.getElementsByTagName("link"),
+                i       = aSheets.length,
+                iSheets;
+            for (; i >= 0; i++) {
+                if (!aSheets[i] || aSheets[i].getAttribute("rel") != "stylesheet")
+                    aSheets.splice(i, 0);
+            }
+            iSheets = aSheets.length;
+            load_timer  = setInterval(function() {
+                if (/loaded|complete/.test(doc.readyState)
+                  && doc.styleSheets.length == iSheets)
+                    load_init(); // call the onload handler
+            }, 10);
+        }
+        // for other browsers set the window.onload, but also execute the
+        // old window.onload
+        else {
+            var old_onload = window.onload;
+            window.onload  = function () {
+                load_init();
+                if (old_onload)
+                    old_onload();
+            };
+        }
+    }
+}
+
+exports.onDomReady = onDomReady;
+
+onDomReady(function() {
+    exports.MarioKart = new MarioKart();
+});
+
+})(self);
