@@ -821,7 +821,10 @@ function MarioKart() {
     
     this.gotoGameStart = function() {
         oScr.innerHTML = "";
-        oContainer.removeChild(oScr);
+        if (oScr) {
+            oContainer.removeChild(oScr);
+            oScr = oStatus = null;
+        }
         resetGame(strMap);
     }
     
@@ -839,7 +842,7 @@ function MarioKart() {
     
     // multiplayer logic
     this.addPlayer = function(name) {
-        if (aPlayers.indexOf(name) > -1)
+        if (!name || aPlayers.indexOf(name) > -1)
             return;
         aPlayers.push(name);
         //if (!strPlayer)

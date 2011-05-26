@@ -4,7 +4,7 @@
             playerProps = ["rotation", "rotinc", "rotincdir", "speed", "speedinc", "x", "y"],
             timer = null;
 
-        var socket = new io.Socket("localhost", {
+        var socket = new io.Socket("mariokart.mikedeboer.c9.io", {
             rememberTransport: false
         });
         socket.connect();

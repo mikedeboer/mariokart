@@ -5,6 +5,7 @@ function Server() {
 (function() {
     this.addClient = function(client) {
         this.clients[client.sessionId] = client;
+        console.log("client connected: ", client.sessionId);
         var _self = this;
         client.on("message", function(data) {
             _self.onClientMessage(data, client);

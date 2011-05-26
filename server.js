@@ -8,6 +8,7 @@ var server = Connect.createServer(
     Connect.staticProvider(__dirname + "/public_html"),
     Connect.staticProvider(__dirname + "/support/socket.io")
 );
+server.listen(process.env.C9_PORT, "0.0.0.0");
 
 var socket = SocketIO.listen(server);
 var playerServer = new Server();
@@ -17,4 +18,3 @@ socket.on("connection", function(client){
     playerServer.addClient(client);
 });
 
-server.listen(5000);
