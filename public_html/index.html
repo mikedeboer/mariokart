@@ -14,27 +14,38 @@
     </head>
     <body>
         <script src="multiplayer.js"></script>
-        <br/>Quality:
+        <br />Players:
+        <select id="players">
+            <option value="1">1</option>
+            <option value="2" selected="selected">2</option>
+            <option value="3">3</option>
+        </select>
+        <!--br />Quality:
         <select id="quality">
             <option value="4">Low</option>
             <option value="2">Medium</option>
-            <option value="1" selected>High</option>
+            <option value="1" selected="selected">High</option>
         </select>&nbsp;&nbsp;Screen size:
         <select id="screenscale">
             <option value="2">Small</option>
             <option value="4">Medium</option>
             <option value="6">Large</option>
-            <option value="8" selected>Very large</option>
+            <option value="8" selected="selected">Very large</option>
         </select>&nbsp;&nbsp;Render mode:
         <select id="rendermode">
-            <option value="0" selected>Single Canvas</option>
+            <option value="0" selected="selected">Single Canvas</option>
             <option value="1">Per-line canvas</option>
-        </select>&nbsp;&nbsp;Music:
+        </select>-->&nbsp;&nbsp;Music:
         <select id="music">
             <option value="0">Off</option>
-            <option value="1" selected>On</option>
-        </select>
+            <option value="1" selected="selected">On</option>
+        </select>&nbsp;&nbsp;<button onclick="MarioKart.reset()">Reset Game</button>
         <script>
+            function onPlayersChange() {
+                var oList = document.getElementById("players");
+                var iValue = parseInt(oList.item(oList.selectedIndex).value);
+                MarioKart.setPlayerCount(iValue);
+            }
             function onQualityChange() {
                 var oList = document.getElementById("quality");
                 var iValue = parseInt(oList.item(oList.selectedIndex).value);
@@ -55,9 +66,10 @@
                 var iValue = parseInt(oList.item(oList.selectedIndex).value);
                 MarioKart.setMusic(iValue);
             }
-            document.getElementById("quality").onchange = onQualityChange;
+            document.getElementById("players").onchange = onPlayersChange;
+            /*document.getElementById("quality").onchange = onQualityChange;
             document.getElementById("screenscale").onchange = onScaleChange;
-            document.getElementById("rendermode").onchange = onRenderModeChange;
+            document.getElementById("rendermode").onchange = onRenderModeChange;*/
             document.getElementById("music").onchange = onMusicChange;
         </script>
         

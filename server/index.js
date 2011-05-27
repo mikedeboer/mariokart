@@ -22,6 +22,8 @@ function Server() {
         switch (data.type) {
             case "playerJoin":
             case "playerMove":
+            case "playerCount":
+            case "reset":
                 //console.log("broadcasting type", data.type);
                 this.broadcast(data, client);
                 break;

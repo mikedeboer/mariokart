@@ -3,8 +3,10 @@
         var lastMove, lastMoveSent, player,
             playerProps = ["rotation", "rotinc", "rotincdir", "speed", "speedinc", "x", "y"],
             timer = null;
+            
+        var playerCount = MarioKart.getPlayerCount();
 
-        var socket = new io.Socket("mariokart.mikedeboer.c9.io", {
+        var socket = new io.Socket(document.domain, {
             rememberTransport: false
         });
         socket.connect();
@@ -19,6 +21,8 @@
         
         socket.on("message", function(msg) {
             msg = JSON.parse(msg);
+            if (playerCount < 2 && msg.type != "playerCount")
+                return;
             //console.log("message received: ", msg.type, msg.player, msg);
             switch (msg.type) {
                 case "playerJoin":
@@ -33,6 +37,12 @@
                 case "playerMove":
                     MarioKart.movePlayer(msg.player, msg);
                     break;
+                case "playerCount":
+                    MarioKart.setPlayerCount(msg.count);
+                    break;
+                case "playerLeave":
+                    MarioKart.reset();
+                    break;
             }
         });
         
@@ -45,6 +55,8 @@
         }
         
         MarioKart.on("playerMove", function(oPlayer) {
+            if (playerCount < 2)
+                return;
             lastMove = buildMoveObject(oPlayer);
             if (timer)
                 return;
@@ -57,12 +69,31 @@
         });
         
         MarioKart.on("playerSelect", function(msg) {
+            if (playerCount < 2)
+                return;
             player = msg;
             socket.send(JSON.stringify({type: "playerJoin", player: msg}));
         });
         
         MarioKart.on("playerMapSelect", function(msg) {
+            if (playerCount < 2)
+                return;
             socket.send(JSON.stringify({type: "playerMapSelect", map: msg, player: player}));
+        });
+        
+        MarioKart.on("playerCountChange", function(num) {
+            playerCount = num;
+            if (playerCount === num || num < 2)
+                return;
+            socket.send(JSON.stringify({type: "playerCount", count: num}));
+        });
+        
+        MarioKart.on("reset", function(num) {
+            if (playerCount < 2)
+                return;
+            socket.send(JSON.stringify({type: "reset", player: player}));
+            clearInterval(timer);
+            lastMove = lastMoveSent = player = null;
         });
     });
 })();

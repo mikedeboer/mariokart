@@ -126,7 +126,7 @@ function MarioKart() {
     var iScreenScale = 8;
     var iQuality = 1; // 1 = best, 2 = half as many lines, etc.
     var bSmoothSprites = true;
-    var bMusic = false;//true;
+    var bMusic = true;
     var _self = this;
 
     function setRenderMode(iValue) {
@@ -157,6 +157,7 @@ function MarioKart() {
     var aPlayers = [];
     var oPlayer;
     var strPlayer = "";
+    var playerCount = 2;
     var iStartPos = -1;
     var iMapWidth;
     var iMapHeight;
@@ -814,6 +815,8 @@ function MarioKart() {
             oPImg.onclick = function() {
                 strMap = this.map;
                 _self.emit("playerMapSelect", strMap);
+                if (playerCount < 2)
+                    _self.gotoGameStart();
             }
             oScr.appendChild(oPImg);
         }
@@ -842,13 +845,12 @@ function MarioKart() {
     
     // multiplayer logic
     this.addPlayer = function(name) {
-        if (!name || aPlayers.indexOf(name) > -1)
+        if (bRunning || !name || aPlayers.indexOf(name) > -1)
             return;
         aPlayers.push(name);
         //if (!strPlayer)
         //    ++iStartPos;
-        // @todo make this action dependant on number of players
-        if (aPlayers.length > 1)
+        if (aPlayers.length >= playerCount)
             return _self.gotoSelectMap();
         
         var imgs = oScr.getElementsByTagName("img");
@@ -873,11 +875,13 @@ function MarioKart() {
     };
     
     this.setMap = function(map) {
+        if (bRunning)
+            return;
         strMap = map;
     };
     
     this.movePlayer = function(player, data) {
-        if (!aKarts.length)
+        if (!bRunning || !aKarts.length)
             return;
         for (var i = 0, l = aKarts.length; i < l; ++i) {
             if (aKarts[i].player != player)
@@ -885,6 +889,23 @@ function MarioKart() {
             for (var j in data)
                 aKarts[i][j] = data[j];
         }
+    };
+    
+    this.setPlayerCount = function(num) {
+        if (bRunning)
+            return;
+        playerCount = parseInt(num);
+        _self.emit("playerCountChange", playerCount);
+    };
+    
+    this.getPlayerCount = function() {
+        return playerCount;
+    };
+    
+    this.reset = function() {
+        if (!bRunning)
+            return;
+        document.location.href = document.location.href;
     };
     
     // event handling code:
