@@ -1,11 +1,9 @@
-require("./paths");
-
 var Connect = require("connect");
 var SocketIO = require("socket.io");
 
 var server = Connect.createServer(
     Connect.staticProvider(__dirname + "/public_html"),
-    Connect.staticProvider(__dirname + "/support/socket.io")
+    Connect.staticProvider(__dirname + "/Socket.IO/lib")
 );
 server.listen(process.env.C9_PORT, "0.0.0.0");
 
