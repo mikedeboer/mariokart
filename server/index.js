@@ -25,19 +25,20 @@ function Server() {
             case "playerCount":
             case "reset":
                 //console.log("broadcasting type", data.type);
-                this.broadcast(data, client);
+                this.broadcast(data, client.sessionId);
                 break;
             case "playerMapSelect":
-                this.broadcast(data, client);
+                this.broadcast(data, client.sessionId);
                 this.startGame();
                 break;
         }
     };
     
     this.onClientDisconnect = function(client) {
-        for (var i in this.clients) {
-            if (this.clients[i] === client) {
-                delete this.clients[i];
+        var sid = client.sessionId;
+        for (var id in this.clients) {
+            if (id == sid) {
+                delete this.clients[id];
                 break;
             }
         }
@@ -59,7 +60,7 @@ function Server() {
             msg = JSON.stringify(msg);
         var _self = this;
         Object.keys(this.clients).forEach(function(id) {
-            if (_self.clients[id] !== exclude)
+            if (id !== exclude)
                 _self.clients[id].send(msg);
         });
     };

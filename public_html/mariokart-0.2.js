@@ -855,7 +855,7 @@ function MarioKart() {
         
         var imgs = oScr.getElementsByTagName("img");
         for (var i = 1, l = imgs.length; i < l; ++i) {
-            if (imgs[i].src.indexOf(name) > -1) {
+            if (imgs[i].player == name) {
                 imgs[i].style.opacity = "0.4";
                 imgs[i].onclick = null;
             }
