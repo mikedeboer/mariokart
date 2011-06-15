@@ -417,13 +417,13 @@ function MarioKart() {
                 return;
             }
             oSpriteCtr.style.display = "block";
-            var fSpriteSize = 32 * fSpriteScale * fScale;
-            oSpriteCtr.style.left = (iX - fSpriteSize / 2) + "px";
-            oSpriteCtr.style.top = (iY - fSpriteSize / 2) + "px";
+            var fSpriteSize = Math.round(32 * fSpriteScale * fScale);
+            oSpriteCtr.style.left = Math.round(iX - fSpriteSize / 2) + "px";
+            oSpriteCtr.style.top = Math.round(iY - fSpriteSize / 2) + "px";
             oImg.style.height = fSpriteSize + "px";
             oSpriteCtr.style.width = fSpriteSize + "px";
             oSpriteCtr.style.height = fSpriteSize + "px";
-            oImg.style.left = -(fSpriteSize * iActiveState) + "px";
+            oImg.style.left = -Math.round(fSpriteSize * iActiveState) + "px";
         }
         this.setState = function(iState) {
             iActiveState = iState;
@@ -455,7 +455,7 @@ function MarioKart() {
         }
         oImg1.src = "media/bg_" + strImage + ".png";
         oCanvas1.style.width = Math.round(iLayerWidth / 2 * iScreenScale + iScreenScale) + "px"
-        oCanvas1.style.height = (10 * iScreenScale) + "px";
+        oCanvas1.style.height = Math.round(10 * iScreenScale) + "px";
         oCanvas1.style.position = "absolute";
         oCanvas1.style.left = "0px";
         var oCanvas2 = document.createElement("canvas");
@@ -466,7 +466,7 @@ function MarioKart() {
         }
         oImg2.src = "media/bg_" + strImage + ".png";
         oCanvas2.style.width = Math.round(iLayerWidth / 2 * iScreenScale) + "px";
-        oCanvas2.style.height = (10 * iScreenScale) + "px";
+        oCanvas2.style.height = Math.round(10 * iScreenScale) + "px";
         oCanvas2.style.position = "absolute";
         oCanvas2.style.left = Math.round(iLayerWidth * iScreenScale) + "px";
         oLayer.appendChild(oCanvas1);
@@ -557,6 +557,7 @@ function MarioKart() {
                 fAngle -= 360;
                 var iAngleStep = Math.round(fAngle / (360 / 22));
                 if (iAngleStep == 22) iAngleStep = 0;
+                
                 oKart.sprite.setState(iAngleStep);
                 oKart.sprite.div.style.zIndex = Math.round(zIndexBase - fTransY);
                 oKart.sprite.draw(((iWidth / 2) + fViewX) * iScreenScale, (iHeight - iViewY) * iScreenScale, fFocal / (fFocal + (fTransY)));
