@@ -823,8 +823,8 @@ function MarioKart() {
     }
     
     this.gotoGameStart = function() {
-        oScr.innerHTML = "";
         if (oScr) {
+            oScr.innerHTML = "";
             oContainer.removeChild(oScr);
             oScr = oStatus = null;
         }

@@ -4,8 +4,8 @@ function Server() {
 
 (function() {
     this.addClient = function(client) {
-        this.clients[client.sessionId] = client;
-        console.log("client connected: ", client.sessionId);
+        this.clients[client.id] = client;
+        console.log("client connected: ", client.id);
         var _self = this;
         client.on("message", function(data) {
             _self.onClientMessage(data, client);
@@ -17,7 +17,7 @@ function Server() {
     
     this.onClientMessage = function(data, client) {
         data = JSON.parse(data);
-        data.sessionId = client.sessionId;
+        data.id = client.id;
 
         switch (data.type) {
             case "playerJoin":
@@ -25,17 +25,17 @@ function Server() {
             case "playerCount":
             case "reset":
                 //console.log("broadcasting type", data.type);
-                this.broadcast(data, client.sessionId);
+                this.broadcast(data, client.id);
                 break;
             case "playerMapSelect":
-                this.broadcast(data, client.sessionId);
+                this.broadcast(data, client.id);
                 this.startGame();
                 break;
         }
     };
     
     this.onClientDisconnect = function(client) {
-        var sid = client.sessionId;
+        var sid = client.id;
         for (var id in this.clients) {
             if (id == sid) {
                 delete this.clients[id];
@@ -44,7 +44,7 @@ function Server() {
         }
         this.broadcast({
             type: "playerLeave",
-            sessionId: client.sessionId
+            id: client.id
         });
     };
     
@@ -60,8 +60,8 @@ function Server() {
             msg = JSON.stringify(msg);
         var _self = this;
         Object.keys(this.clients).forEach(function(id) {
-            if (id !== exclude)
-                _self.clients[id].send(msg);
+            if (id !== exclude){console.log(_self.clients[id]);
+                _self.clients[id].send(msg);}
         });
     };
 }).call(Server.prototype);

@@ -1,0 +1,9 @@
+{
+    "name": "mariokart_demo",
+    "version": "0.0.1",
+    "dependencies": {
+        "connect": "1.7.x",
+        "socket.io": "0.8.x",
+        "socket.io-client": "0.8.x"
+    }
+}

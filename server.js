@@ -12,7 +12,7 @@ var Server = require("./server/index");
 var playerServer = new Server();
 
 var socket = SocketIO.listen(server);
-socket.on("connection", function(client){
+socket.sockets.on("connection", function(client){
     // new client is here!
     playerServer.addClient(client);
 });

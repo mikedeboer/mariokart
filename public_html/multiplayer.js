@@ -5,13 +5,10 @@ onDomReady(function() {
         
     var playerCount = MarioKart.getPlayerCount();
 
-    var socket = new io.Socket(document.domain, {
-        rememberTransport: false
-    });
-    socket.connect();
+    var socket = io.connect();
     
     socket.on("connect", function(e) {
-        //
+        console.log("connected!");
     });
     
     socket.on("disconnect", function() {
@@ -63,7 +60,7 @@ onDomReady(function() {
             if (lastMoveSent === lastMove)
                 return;
             lastMoveSent = lastMove;
-            socket.send(JSON.stringify(lastMove));
+            socket.json.send(lastMove);
         }, 200);
     });
     
@@ -71,26 +68,26 @@ onDomReady(function() {
         if (playerCount < 2)
             return;
         player = msg;
-        socket.send(JSON.stringify({type: "playerJoin", player: msg}));
+        socket.json.send({type: "playerJoin", player: msg});
     });
     
     MarioKart.on("playerMapSelect", function(msg) {
         if (playerCount < 2)
             return;
-        socket.send(JSON.stringify({type: "playerMapSelect", map: msg, player: player}));
+        socket.json.send({type: "playerMapSelect", map: msg, player: player});
     });
     
     MarioKart.on("playerCountChange", function(num) {
         playerCount = num;
         if (playerCount === num || num < 2)
             return;
-        socket.send(JSON.stringify({type: "playerCount", count: num}));
+        socket.json.send({type: "playerCount", count: num});
     });
     
     MarioKart.on("reset", function(num) {
         if (playerCount < 2)
             return;
-        socket.send(JSON.stringify({type: "reset", player: player}));
+        socket.json.send({type: "reset", player: player});
         clearInterval(timer);
         lastMove = lastMoveSent = player = null;
     });
